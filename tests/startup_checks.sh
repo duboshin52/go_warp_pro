@@ -108,3 +108,15 @@ grep -qx 'ip rule add from 10.9.0.1/32 table 100 priority 100' "$rt/log"
 refute 'rule add from'
 refute 'mangle'
 echo 'startup: block resolves clients by key at run time, follows a subnet change OK'
+
+# init_config создаёт пустой конфиг до check_license: новая прямая установка
+# всё равно обязана остановиться, а завершённая установка — открыть меню.
+WARP_CONF="$case_root/license.conf"
+printf 'LICENSE_KEY=""\nINSTALLED_VERSION=""\n' > "$WARP_CONF"
+if (check_license "") > "$case_root/license.out" 2>&1; then
+    echo 'FAIL: fresh config bypassed the install license' >&2; exit 1
+fi
+grep -q 'Для установки требуется лицензионный ключ' "$case_root/license.out"
+printf 'LICENSE_KEY=""\nINSTALLED_VERSION="2.5.2"\n' > "$WARP_CONF"
+check_license ""
+echo 'startup: fresh install requires a license, installed copy remains usable OK'

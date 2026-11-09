@@ -513,7 +513,10 @@ check_license() {
     if [ -n "$arg_key" ] && is_valid_key "$arg_key"; then
         save_config_val "LICENSE_KEY" "$arg_key"; LICENSE_KEY="$arg_key"; return 0
     fi
-    if [ "$(readlink -f "$0" 2>/dev/null)" = "/usr/local/bin/gowarp" ] || [ -f "$WARP_CONF" ]; then
+    # init_config создаёт WARP_CONF до этой проверки, поэтому само наличие
+    # файла не доказывает лицензию. Повторный запуск без ключа разрешён
+    # только установленной копии или после завершённой установки.
+    if [ "$(readlink -f "$0" 2>/dev/null)" = "/usr/local/bin/gowarp" ] || [ -n "${INSTALLED_VERSION:-}" ]; then
         return 0
     fi
     echo -e "\n${RED}**********************************************************${NC}"
